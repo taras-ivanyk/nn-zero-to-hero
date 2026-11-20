@@ -23,6 +23,7 @@ Tiny Shakespeare is downloaded to `03-gpt/data/input.txt` on first use.
 
 | Model | Train loss | Val loss | Hardware | Time |
 |---|---|---|---|---|
+| Notebook final model: 4 layers, 4 heads, 64-d, block 32, 209,729 parameters, 5,000 iterations | 1.6635 | 1.8226 | TBD | TBD |
 | `gpt.py` default config, 5,000 iterations | TBD | TBD | TBD | TBD |
 
 ## What I learned

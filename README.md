@@ -33,6 +33,7 @@ Numbers come from notebook outputs or from runs of the scripts in this repo. Any
 | MLP + BatchNorm (part 3) | names | train / val loss | 2.0666 / 2.1051 |
 | MLP, manual backprop (part 4) | names | train / val loss | 2.0714 / 2.1095 |
 | WaveNet-style (part 5), 76,963 params | names | train / val loss | 1.7669 / 1.9845 |
+| Char-level GPT (notebook, 4 layers, 64-d, 0.21M params) | Tiny Shakespeare | train / val loss | 1.6635 / 1.8226 |
 | Char-level GPT (`gpt.py`, 10.8M params) | Tiny Shakespeare | train / val loss | TBD |
 | BPE tokenizers, vocab 1000 | `taylorswift.txt` | compression (basic / regex) | 3.19x / 2.64x |
 | GPT-2 124M (mine) | FineWeb-Edu | train / val loss | TBD |
