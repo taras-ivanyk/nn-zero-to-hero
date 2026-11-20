@@ -1,0 +1,12 @@
+torch>=2.14
+numpy>=2.5
+tiktoken>=0.14
+regex>=2026.9
+transformers>=5.23  # only to load OpenAI GPT-2 weights and verify 05-gpt2-124m
+datasets>=5.2
+tqdm>=4.70
+matplotlib>=3.11
+jupyter>=1.1
+pytest>=9.2
+scikit-learn>=1.9  # two-moons dataset in 01-micrograd
+graphviz>=0.21  # graph drawing in the micrograd notebook (also needs the Graphviz system package)

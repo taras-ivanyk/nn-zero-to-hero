@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Data and artifacts
+data/
+*.bin
+*.npy
+*.pt
+*.pth
+*.safetensors
+checkpoints/
+models/
+log/
+logs/
+wandb/
+runs/
+
+# IDE
+.idea/
+.vscode/
+
+# Private notes
+instructions.md
+CURSOR_INSTRUCTIONS.md
