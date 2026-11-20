@@ -87,4 +87,4 @@ This repository follows Andrej Karpathy's [Neural Networks: Zero to Hero](https:
 
 ## Author
 
-Taras Ivanyk · [GitHub](https://github.com/taras-ivanyk) · LinkedIn: TBD
+Taras Ivanyk · [GitHub](https://github.com/taras-ivanyk) · [LinkedIn](https://www.linkedin.com/in/taras-ivanyk-a80773347/)
