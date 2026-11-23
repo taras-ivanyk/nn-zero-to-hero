@@ -168,32 +168,33 @@ class GPT(nn.Module):
         return model
 
 # --------------------------------------------------
-if __name__ == "__main__":
 
-    num_return_sequences = 5
-    max_length = 30
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+num_return_sequences = 5
+max_length = 30
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = GPT.from_pretrained('gpt2')
-    model.eval()
-    model.to(device)
+model = GPT.from_pretrained('gpt2')
+model.eval()
+model.to(device)
 
-    # encode the prompt and repeat it for each sequence
-    enc = tiktoken.get_encoding("gpt2")
-    tokens = torch.tensor(enc.encode("Hello, I'm a language model,"), dtype=torch.long)  # (8,)
-    x = tokens.unsqueeze(0).repeat(num_return_sequences, 1).to(device)  # (5, 8)
+# encode the prompt and repeat it for each sequence
+enc = tiktoken.get_encoding("gpt2")
+tokens = torch.tensor(enc.encode("Hello, I'm a language model,"), dtype=torch.long)  # (8,)
+x = tokens.unsqueeze(0).repeat(num_return_sequences, 1).to(device)  # (5, 8)
 
-    # generate: sample one token at a time with top-k = 50
-    torch.manual_seed(42)
-    while x.size(1) < max_length:
-        with torch.no_grad():
-            logits, _ = model(x)  # (B, T, vocab_size)
-            logits = logits[:, -1, :]  # last position only
-            probs = F.softmax(logits, dim=-1)
-            topk_probs, topk_indices = torch.topk(probs, 50, dim=-1)  # (B, 50)
-            ix = torch.multinomial(topk_probs, 1)  # (B, 1)
-            xcol = torch.gather(topk_indices, -1, ix)  # (B, 1)
-            x = torch.cat((x, xcol), dim=1)
+# generate: sample one token at a time with top-k = 50
+torch.manual_seed(42)
+while x.size(1) < max_length:
+    with torch.no_grad():
+        logits, _ = model(x)  # (B, T, vocab_size)
+        logits = logits[:, -1, :]  # last position only
+        probs = F.softmax(logits, dim=-1)
+        topk_probs, topk_indices = torch.topk(probs, 50, dim=-1)  # (B, 50)
+        ix = torch.multinomial(topk_probs, 1)  # (B, 1)
+        xcol = torch.gather(topk_indices, -1, ix)  # (B, 1)
+        x = torch.cat((x, xcol), dim=1)
 
-    for i in range(num_return_sequences):
-        print(">", enc.decode(x[i, :max_length].tolist()))
+for i in range(num_return_sequences):
+    tokens = x[i, :max_length].tolist()
+    decoded = enc.decode(tokens)
+    print(">", decoded)

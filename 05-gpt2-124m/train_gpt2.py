@@ -1,11 +1,4 @@
-"""Train GPT-2 (124M).
-
-Current stage: single process, tiny Shakespeare, constant LR.
-    python train_gpt2.py --micro-batch-size 4 --seq-len 32 --max-steps 50
-
-Planned: FineWeb-Edu shards, multi-GPU via
-    torchrun --standalone --nproc_per_node=8 train_gpt2.py
-"""
+"""Train GPT-2 (124M)"""
 
 from __future__ import annotations
 
