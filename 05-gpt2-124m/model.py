@@ -87,6 +87,10 @@ class GPT(nn.Module):
         ))
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
 
+        # weight tying: the input embedding and the output projection share one matrix
+        # (as in GPT-2 and "Attention Is All You Need"); saves 50257*768 ≈ 38.6M params
+        self.transformer.wte.weight = self.lm_head.weight
+
     def forward(self, idx, targets=None):
         B, T = idx.size()
         assert T <= self.config.block_size, f"sequence length {T} exceeds block_size {self.config.block_size}"
