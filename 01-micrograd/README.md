@@ -25,4 +25,8 @@ pytest ../tests/test_micrograd.py
 
 ## What I learned
 
-TBD
+- A gradient tells you how much the output changes if you nudge one number slightly. Backpropagation is the chain rule applied from the output back through the graph in reverse topological order, and each node only needs to know its own local derivative.
+- When a `Value` is used more than once (for example `a + a`), its gradient has to be added up with `+=`, not overwritten. I hit this bug myself.
+- Comparing my gradients with PyTorch on a single neuron is a quick way to trust the engine before training anything.
+- I extended `trace` to accept a list of outputs, so several of them, such as the predictions for a few inputs, can be drawn in one graph that shows they share the same weights.
+- A tiny MLP built from scalar `Value`s reached 100% training accuracy on two moons by step 47, but it is very slow. That is why real frameworks work with tensors.
