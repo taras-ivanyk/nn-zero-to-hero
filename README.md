@@ -34,7 +34,7 @@ Numbers come from notebook outputs or from runs of the scripts in this repo. Any
 | MLP, manual backprop (part 4) | names | train / val loss | 2.0714 / 2.1095 |
 | WaveNet-style (part 5), 76,963 params | names | train / val loss | 1.7669 / 1.9845 |
 | Char-level GPT (notebook, 4 layers, 64-d, 0.21M params) | Tiny Shakespeare | train / val loss | 1.6635 / 1.8226 |
-| Char-level GPT (`gpt.py`, 10.8M params) | Tiny Shakespeare | train / val loss | TBD |
+| Char-level GPT (`gpt.py`, 10.8M params) | Tiny Shakespeare | train / val loss | 1.0489 / 1.4926 |
 | BPE tokenizers, vocab 1000 | `taylorswift.txt` | compression (basic / regex) | 3.19x / 2.64x |
 | GPT-2 124M (mine) | FineWeb-Edu | train / val loss | TBD |
 | GPT-2 124M (mine) | HellaSwag (10,042 val) | acc_norm vs OpenAI GPT-2 124M | TBD / TBD |
@@ -69,7 +69,8 @@ nn-zero-to-hero/
 ├── 03-gpt/
 │   ├── gpt_from_scratch.ipynb
 │   ├── gpt.py
-│   └── experiments/          v1_single_head.py, v2_transformer.py
+│   ├── experiments/          v1_single_head.py, v2_transformer.py
+│   └── assets/               loss curve, training log and results of the gpt.py run
 ├── 04-tokenizer/
 │   ├── tokenizer/            base.py, basic.py, regex.py
 │   ├── train_tokenizer.py

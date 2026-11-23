@@ -24,8 +24,34 @@ Tiny Shakespeare is downloaded to `03-gpt/data/input.txt` on first use.
 | Model | Train loss | Val loss | Hardware | Time |
 |---|---|---|---|---|
 | Notebook final model: 4 layers, 4 heads, 64-d, block 32, 209,729 parameters, 5,000 iterations | 1.6635 | 1.8226 | TBD | TBD |
-| `gpt.py` default config, 5,000 iterations | TBD | TBD | TBD | TBD |
+| `gpt.py` default config: 6 layers, 6 heads, 384-d, block 256, 10.79M parameters, 5,000 iterations | 1.0489 | 1.4926 | Tesla T4 (Kaggle) | 51.5 min |
+
+Losses are averaged over 200 batches at each evaluation (every 500 steps, plus the last step). The best validation loss was 1.4757 at step 4500. After step 3000, validation loss stopped improving (1.4894 → 1.4926) while training loss kept falling (1.2007 → 1.0489), so the gap between them grew from 0.29 to 0.44: the model starts to memorise the training text.
+
+![Train and validation loss of gpt.py](assets/loss_curve.png)
+
+The full training log, with the 1000-character sample, is in [`assets/train.log`](assets/train.log), and the parsed numbers are in [`assets/results.json`](assets/results.json).
+
+A sample from the trained model (`--max-new-tokens 1000`, excerpt):
+
+```
+HASTINGS:
+And whether I take't it against the sourses
+Take but and not wench, dreams on a coept.
+
+CLARENCE:
+To sweat for my dear lies a fairer.
+
+WARWICK:
+My lord, welcome, I will perceive
+Whom perform'd friends, as you, sir.
+```
+
+The model has learned the format of a play (speaker names in capitals, line breaks, punctuation) and mostly real English words, but not meaning.
 
 ## What I learned
 
-TBD
+- Self-attention lets each token decide which earlier tokens to listen to: a weighted average with weights computed from the data. The `tril` mask stops it from seeing the future, and since attention has no sense of order, position embeddings are required.
+- Attention and dropout were the hardest parts for me. Dropout only acts during training, which is why `model.eval()` matters before measuring loss.
+- Most of my bugs were shape errors from mixing up the batch, time, channel and head dimensions. The worst bug gave no error at all: v1 computes `k @ q.T` instead of `q @ k.T`, and both have shape `(B, T, T)`, so it trains anyway.
+- The small notebook model (0.21M parameters) reached 1.82 validation loss and writes much less convincing text. The 10.8M model gets to 1.49, but the gap between training and validation loss grows to 0.44: a bigger model starts to memorise the training text, and here the best checkpoint would have been around step 4500, not the last one.

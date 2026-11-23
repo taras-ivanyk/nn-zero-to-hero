@@ -31,4 +31,8 @@ The regex tokenizer compresses less on this text because merges cannot span chun
 
 ## What I learned
 
-TBD
+- Byte-level BPE never hits an unknown token: any text is just UTF-8 bytes, and merges only add shortcuts on top of the 256 base bytes.
+- The vocabulary reflects its training text. On `taylorswift.txt` the very first merge was `20` (token 257), followed early by `201` and `202`, because the text is full of years. The GPT-4 regex splits numbers into chunks of at most 3 digits, so a year like `2014` can never be a single token.
+- The regex split costs compression (2.64x vs 3.19x) and doubles training time. In return, tokens stay inside words: ` October` becomes one token, but `'s ` across a boundary does not.
+- Tokenization explains some odd model behaviour: a word can be split in unexpected places (for example `S` + `eptember`), so the model never actually sees the letters of a word.
+- English-trained tokenizers handle Ukrainian poorly: Cyrillic takes 2 bytes per character in UTF-8, and the merges are learned from English text. When I trained a WordPiece tokenizer on Ukrainian text, I got much better results.

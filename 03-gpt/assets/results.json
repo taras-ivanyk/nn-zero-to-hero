@@ -1,0 +1,25 @@
+{
+  "commit": "b3f5550",
+  "gpu": "Tesla T4",
+  "torch": "2.11.0+cu130",
+  "params_M": 10.79,
+  "final_step": 4999,
+  "final_train": 1.0489,
+  "final_val": 1.4926,
+  "best_val_step": 4500,
+  "best_val": 1.4757,
+  "wall_clock_min": 51.5,
+  "curve": [
+    {"step": 0, "train": 4.2846, "val": 4.282},
+    {"step": 500, "train": 1.8864, "val": 2.0021},
+    {"step": 1000, "train": 1.5358, "val": 1.7217},
+    {"step": 1500, "train": 1.3945, "val": 1.6031},
+    {"step": 2000, "train": 1.3079, "val": 1.5497},
+    {"step": 2500, "train": 1.252, "val": 1.5148},
+    {"step": 3000, "train": 1.2007, "val": 1.4894},
+    {"step": 3500, "train": 1.1588, "val": 1.4806},
+    {"step": 4000, "train": 1.1222, "val": 1.481},
+    {"step": 4500, "train": 1.0847, "val": 1.4757},
+    {"step": 4999, "train": 1.0489, "val": 1.4926}
+  ]
+}
