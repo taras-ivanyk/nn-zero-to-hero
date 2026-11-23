@@ -43,4 +43,8 @@ Part 2 also contains my batch-size experiment (train/dev loss and training time 
 
 - BatchNorm acts as a regulariser: in part 3 the training loss went up slightly after adding it while the validation loss stayed about the same.
 - In part 2, larger batches gave a lower loss for the same number of steps but cost more time per run (8.4 s at batch 32 vs 65.5 s at batch 1024).
-- TBD
+- Initialisation matters a lot. In part 3, fixing the saturated tanh layer alone took val loss from 3.30 to 2.11, and Kaiming-style scaling brought it to 2.10. After the fixes, all five tanh layers had only about 2–4% saturated units and a steady std of about 0.65 through the depth.
+- The hardest gradients in part 4 were BatchNorm and cross-entropy. Both look simple in the forward pass but have many paths in the backward pass. The analytic form at the end is much shorter than the step-by-step version.
+- From the batch-size experiment I would pick 256: it reached 2.303 dev loss in 21 s, while 1024 was only 0.008 better and took 3x longer.
+- In part 5, more context helped more than more structure: going from 3 to 8 characters dropped val loss from 2.105 to 2.034, while the hierarchical layout alone only got to 2.029.
+- A BatchNorm bug with 3-D inputs trained without any error and only showed up in the loss (2.029 → 2.022 after the fix). Some bugs only show up in the numbers.
