@@ -1,16 +1,23 @@
-"""Train GPT-2 (124M) on FineWeb-Edu shards.
+"""Train GPT-2 (124M).
 
-Scaffold only. Single GPU:   python train_gpt2.py
-               Multi-GPU:    torchrun --standalone --nproc_per_node=8 train_gpt2.py
+Current stage: single process, tiny Shakespeare, constant LR.
+    python train_gpt2.py --micro-batch-size 4 --seq-len 32 --max-steps 50
+
+Planned: FineWeb-Edu shards, multi-GPU via
+    torchrun --standalone --nproc_per_node=8 train_gpt2.py
 """
 
 from __future__ import annotations
 
 import argparse
+import time
 from pathlib import Path
 
 import numpy as np
+import tiktoken
 import torch
+
+from model import GPT, GPTConfig
 
 
 def load_tokens(path: Path) -> torch.Tensor:
@@ -19,16 +26,31 @@ def load_tokens(path: Path) -> torch.Tensor:
 
 
 class DataLoaderLite:
-    """Serves (B, T) batches from consecutive shards; each DDP rank reads its own slice."""
+    """Serves consecutive (B, T) batches from one text file, wrapping around at the end.
 
-    def __init__(self, B: int, T: int, process_rank: int, num_processes: int, split: str, data_root: Path):
-        raise NotImplementedError
+    Later this will read FineWeb-Edu shards and give each DDP rank its own slice.
+    """
+
+    def __init__(self, B: int, T: int, input_file: Path):
+        self.B, self.T = B, T
+        enc = tiktoken.get_encoding("gpt2")
+        self.tokens = torch.tensor(enc.encode(input_file.read_text()), dtype=torch.long)
+        print(f"loaded {len(self.tokens):,} tokens, 1 epoch = {len(self.tokens) // (B * T)} batches")
+        self.reset()
 
     def reset(self) -> None:
-        raise NotImplementedError
+        self.current_position = 0
 
     def next_batch(self) -> tuple[torch.Tensor, torch.Tensor]:
-        raise NotImplementedError
+        B, T = self.B, self.T
+        buf = self.tokens[self.current_position : self.current_position + B * T + 1]
+        x = buf[:-1].view(B, T)  # inputs
+        y = buf[1:].view(B, T)  # targets: the next token for every position
+        self.current_position += B * T
+        # if the next batch would run past the end, start over
+        if self.current_position + B * T + 1 > len(self.tokens):
+            self.reset()
+        return x, y
 
 
 def setup_ddp() -> tuple[bool, int, int, int, str]:
@@ -52,6 +74,7 @@ def save_checkpoint(path: Path, model, optimizer, step: int, val_loss: float) ->
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--input-file", type=Path, default=Path("data/input.txt"), help="text file to train on (tiny Shakespeare)")
     p.add_argument("--data-root", type=Path, default=Path("data/edu_fineweb10B"))
     p.add_argument("--log-dir", type=Path, default=Path("log"))
     p.add_argument("--total-batch-size", type=int, default=2**19, help="tokens per optimizer step")
@@ -69,10 +92,32 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    # TODO: DDP setup, seeds, TF32, data loaders, model, optimizer,
-    # loop with gradient accumulation + bf16 autocast + grad clipping,
-    # periodic val loss / HellaSwag / samples / checkpoints, tokens/sec logging.
-    raise NotImplementedError
+    # TODO (next steps): DDP setup, TF32, LR schedule, gradient accumulation,
+    # bf16 autocast, grad clipping, val loss / HellaSwag / samples / checkpoints.
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"using device: {device}")
+    torch.manual_seed(args.seed)
+
+    train_loader = DataLoaderLite(B=args.micro_batch_size, T=args.seq_len, input_file=args.input_file)
+
+    model = GPT(GPTConfig())  # random init, 124M parameters
+    model.to(device)
+
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.max_lr)
+    for step in range(args.max_steps):
+        t0 = time.time()
+        x, y = train_loader.next_batch()
+        x, y = x.to(device), y.to(device)
+        optimizer.zero_grad()
+        logits, loss = model(x, y)
+        loss.backward()
+        optimizer.step()
+        if device == "cuda":
+            torch.cuda.synchronize()  # wait for the GPU so the timing is real
+        dt = time.time() - t0
+        tokens_per_sec = x.numel() / dt
+        print(f"step {step:4d} | loss {loss.item():.4f} | dt {dt * 1000:.0f}ms | tok/s {tokens_per_sec:.0f}")
 
 
 if __name__ == "__main__":
